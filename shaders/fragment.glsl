@@ -79,8 +79,8 @@ vec3 get_color(vec3 p) {
     );
 }
 
-vec3 get_ambient(vec3 p, vec3 light_color, float strength) {
-    return get_color(p)*light_color*strength;
+vec3 get_ambient(vec3 p, float strength) {
+    return get_color(p)*strength;
 }
 
 vec3 get_diffuse(vec3 p, vec3 l) {
@@ -89,11 +89,10 @@ vec3 get_diffuse(vec3 p, vec3 l) {
     return max(dot(normal,normalize(l-p)),0.0)*color;
 }
 
-vec3 get_specular(vec3 p, vec3 va, vec3 l, vec3 lc) {
+float get_specular(vec3 p, vec3 va, vec3 l) {
     vec3 normal = get_normal(p);
     vec3 light_out = reflect((-l+p),normal);
-    vec3 color = get_color(p);
-    return pow(clamp(dot(-va,light_out)/20., 0.0, 1.0),8.)*lc;
+    return pow(clamp(dot(-va,light_out)/20., 0.0, 1.0),8.);
 }
 
 
@@ -111,15 +110,15 @@ void main() {
 
     t = 0.0;
     float dist;
-    vec3 light_pos = vec3(1,2,1);
-    vec3 light_color = vec3(0.8157, 0.1686, 0.4588);
+    vec3 light_pos = vec3(1,3,1);
+    vec3 sky_color = vec3(0.1686, 0.451, 0.8157);
 
     // vec3 light_pos = 10.*vec3(cos(u_time/3.),2,sin(u_time/3.));
     // vec3 light_color = vec3(0.8235, 0.251, 0.5686);
-    float light_strength = 0.3;
+    float light_strength = 0.4;
 
     gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
-
+    
 
     for(float reflection = 0.0; reflection < nb_reflections; reflection++) {
         for (float steps = 0.0; steps < max_steps; steps++) {
@@ -131,14 +130,14 @@ void main() {
         }
 
         if (t > FAR) {
-            gl_FragColor += vec4(light_color*exp(-0.5*reflection), 1.0);
+            gl_FragColor += vec4(sky_color*exp(-0.5*reflection), 1.0);
             return;
         }
 
         gl_FragColor += power(vec4(
-            get_ambient(ro, light_color, light_strength) +
+            get_ambient(ro, light_strength) +
             get_diffuse(ro, light_pos)*2.0 +
-            get_specular(ro, rd, light_pos, light_color)*0.3
+            get_specular(ro, rd, light_pos)*0.3
             ,1),1.5) * exp(-0.5*reflection);
         
         rd = reflect(rd, get_normal(ro));

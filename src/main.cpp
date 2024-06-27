@@ -1,5 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include <math.h>
 
 #define WIDTH  1280
 #define HEIGHT 720
@@ -7,6 +8,34 @@
 #define ROT_SPEED 10
 
 int reflections = 3;
+
+sf::Transform rotation_y(float angle) {
+    float c = cos(angle);
+    float s = sin(angle);
+    return sf::Transform(
+        c, 0,-s,
+        0, 1, 0,
+        s, 0, c
+    );
+}
+sf::Transform rotation_z(float angle) {
+    float c = cos(angle);
+    float s = sin(angle);
+    return sf::Transform(
+        c, s, 0,
+       -s, c, 0,
+        0, 0, 1
+    );
+}
+sf::Transform rotation_x(float angle) {
+    float c = cos(angle);
+    float s = sin(angle);
+    return sf::Transform(
+        1, 0, 0,
+        0, c, s,
+        0,-s, c
+    );
+}
 
 void Draw(sf::RenderWindow& window, sf::ConvexShape& quad, sf::Shader& shader, sf::Vector3f& pos, sf::Transform& rot) {
     shader.setUniform("u_resolution", sf::Glsl::Vec2(window.getSize()));
@@ -50,12 +79,14 @@ void Update(sf::RenderWindow& window, sf::Vector3f& pos, sf::Transform& rot, sf:
 
     
 
-    // /* Camera rotation */ {
-    //     if (sf::Keyboard::isKeyPressed(sf::Keyboard::K)) { pos.z -= ROT_SPEED * dt; }
-    //     if (sf::Keyboard::isKeyPressed(sf::Keyboard::I)) { pos.z += ROT_SPEED * dt; }
-    //     if (sf::Keyboard::isKeyPressed(sf::Keyboard::J)) { pos.x -= ROT_SPEED * dt; }
-    //     if (sf::Keyboard::isKeyPressed(sf::Keyboard::L)) { pos.x += ROT_SPEED * dt; }
-    // }
+    /* Camera rotation */ {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::K)) { rot*= rotation_x( ROT_SPEED * dt); }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::I)) { rot*= rotation_x(-ROT_SPEED * dt);; }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::J)) { pos.x -= ROT_SPEED * dt; }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::L)) { pos.x += ROT_SPEED * dt; }
+    }
+
+
 }
 
 int main(int argc, char const *argv[])
