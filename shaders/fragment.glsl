@@ -6,6 +6,7 @@
 
 uniform vec2 u_resolution;
 uniform vec3 u_camera_pos;
+uniform mat3 u_camera_rot;
 
 #define PI_TWO			1.570796326794897
 #define PI				3.141592653589793
@@ -107,6 +108,7 @@ void main() {
 	// vec3 rd = normalize( uv.x*uu + uv.y*vv + ww );
 
     vec3 rd = normalize(vec3(uv, 1));
+    rd *= u_camera_rot;
 
     t = 0.0;
     float dist;
